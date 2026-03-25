@@ -1,41 +1,91 @@
-# 基于微藻的太空生命维持系统设计 (Microalgae Model for BLSS)
+# Chlorella pyrenoidosa GY-D12 — 混合营养生长模型
 
-## 项目概述
+> 基于 v6 Logistic-Monod 解析模型，研究蛋白核小球藻在不同葡萄糖浓度下的生长动力学，并评估其在太空生物再生生命保障系统（BLSS）中的应用潜力。
 
-本项目是一个关于**基于微藻的太空生命维持系统设计**的计算生物学与工程设计项目。核心目标是研究蛋白核小球藻（*Chlorella pyrenoidosa* GY-D12）在不同葡萄糖浓度下的混合营养生长动力学，并基于此建立数学模型，预测其在太空生物再生生命保障系统（BLSS）中的应用潜力，包括氧气产出、营养物质（蛋白质、碳水化合物、脂质）积累以及系统控制的可行性。
+## 快速开始
 
-## 核心发现
+```bash
+# 1. 克隆仓库
+git clone https://github.com/abida304523-afk/microalgae-blss-model.git
+cd microalgae-blss-model
 
-1. **最优混养浓度**：实验和模型均表明，5 g/L 葡萄糖是综合最优的培养条件。虽然 10 g/L 能获得更高的生物量，但会导致严重的光合抑制，且由于异养呼吸消耗增加，其净产氧量反而低于 5 g/L 组。
-2. **模型创新**：传统的固定承载力模型无法同时拟合不同葡萄糖浓度下的生长曲线。本项目引入的**饱和型承载力函数 $K(S)$** 显著提升了拟合精度（$R^2$ 达到 0.92）。
-3. **产物动态演变**：模型预测显示，随着培养时间的推移和葡萄糖浓度的增加，微藻的蛋白质比例下降，而碳水化合物和脂质比例上升。这为 BLSS 中根据宇航员需求动态调整收获时间提供了理论指导。
-4. **BLSS 工程应用**：基于模型预测，维持一名宇航员的氧气供应约需 1680 L 的有效培养体积（5 g/L 葡萄糖条件下）。同时，该解析模型计算速度极快，完全具备嵌入 PBR 实时控制系统的潜力。
+# 2. 安装依赖
+pip install -r requirements.txt
 
-## 目录结构与核心文件
+# 3. 准备数据（将 Excel 文件放入 data/ 目录）
+mkdir data
+cp /path/to/生长曲线.xlsx data/
+cp /path/to/光合活性的变化.xlsx data/
 
-### 1. 动力学模型演化与拟合脚本
-包含了一系列以 `fit_` 开头的 Python 脚本，记录了微藻生长动力学模型从简单到复杂的演化过程。
-* `fit_v6_optimized.py`: **最终采用的核心模型**。使用 Logistic 解析解加速计算，引入饱和型承载力函数 $K(S)$，总体 $R^2$ 达到 0.92。
-* `chlorella_mixotrophic_model.py`: 基础 Haldane-Monod 框架，包含完整的 ODE 系统。
+# 4. 运行拟合
+python fit_v6_optimized.py
 
-### 2. 模型验证与产物预测模块
-* `validation.py`: 执行模型的外部验证（留一交叉验证、文献参数对比、跨物种结构验证）。
-* `product_prediction.py`: 基于 v6 模型的预测结果，结合文献化学计量关系，计算微藻的干重、大分子组成及氧气的动态产出。
-* `blss_analysis.py`: 应用层脚本，将预测结果转化为 BLSS 的工程指标（PBR 体积、营养供给、多目标优化等）。
+# 5. 运行产物预测
+python product_prediction.py
 
-### 3. 数据与参数文件
-* `params_v6.csv` / `params_v7.csv` 等: 存储各版本模型拟合得到的动力学参数。
-* `product_predictions.csv`: 详细记录了不同葡萄糖浓度下，随时间变化的细胞密度、干重、各营养成分含量及氧气累积量。
-* `blss_analysis_results.csv`: 汇总了 PBR 氧气供应、营养分析等工程指标。
+# 6. 运行 BLSS 工程分析
+python blss_analysis.py
+```
 
-### 4. 文档与汇报材料
-* `report_step3_step4.md`: 详细的工作报告，阐述了模型验证和产物预测的流程及问题解决方案。
-* `中期答辩讲稿.md` / `中期答辩PPT大纲.md`: 中期答辩准备材料，完整串联了整个研究故事。
-* `references.md`: 项目引用的参考文献列表。
+## 项目结构
 
-## 运行环境
-* Python 3.x
-* 依赖库: `numpy`, `pandas`, `scipy`, `matplotlib`, `lmfit`
+```
+microalgae-blss-model/
+├── config.py               # 全局配置（路径、常数）
+├── requirements.txt        # 依赖声明
+├── .gitignore
+│
+├── core/                   # 核心模块（公共函数）
+│   ├── __init__.py
+│   ├── data_loader.py      # 数据加载
+│   ├── model.py            # 生长动力学模型
+│   └── utils.py            # 通用计算工具
+│
+├── fit_v6_optimized.py     # v6 模型拟合（主脚本）
+├── product_prediction.py   # 产物预测
+├── blss_analysis.py        # BLSS 工程分析
+├── validation.py           # 模型验证（LOOCV + 跨物种）
+├── publication_figures.py  # 论文图表生成
+│
+├── data/                   # 原始实验数据（不提交）
+│   ├── 生长曲线.xlsx
+│   └── 光合活性的变化.xlsx
+│
+└── output/                 # 生成的图表和结果（自动创建）
+    ├── params_v6.csv
+    ├── product_predictions.csv
+    └── *.png
+```
 
-## 许可证
-本项目仅供学术研究和交流使用。
+## 核心模型
+
+**v6 Logistic-Monod 解析模型**：
+
+$$X(t) = \frac{K(S) \cdot X_0}{X_0 + (K(S) - X_0) e^{-\mu(S) t}}$$
+
+$$\mu(S) = \mu_0 + \frac{\mu_S \cdot S}{K_S + S}, \quad K(S) = K_0 + \frac{K_{max} \cdot S}{S_K + S}$$
+
+| 参数 | 含义 | 单位 | 拟合值 |
+|------|------|------|--------|
+| μ₀ | 自养最大比生长速率 | d⁻¹ | 0.120 |
+| μ_S | 葡萄糖促进生长速率 | d⁻¹ | 0.499 |
+| K_S | Monod 半饱和常数 | g/L | 0.519 |
+| K₀ | 自养承载力 | ×10⁶ cells/mL | 22.5 |
+| K_max | 葡萄糖增加的最大承载力 | ×10⁶ cells/mL | 106.8 |
+
+**总体 R² = 0.92**（5 个浓度组均值）
+
+## 主要结论
+
+- **最优操作点**：5 g/L 葡萄糖，平均 O₂ 产率最高（~483 mg/L/day）
+- **BLSS 体积需求**：满足 1 名宇航员 O₂ 需求约需 1740 L PBR
+- **模型计算速度**：~17.6 万次预测/秒，支持实时控制
+
+## 引用
+
+如使用本项目，请引用：
+
+```
+[作者]. C. pyrenoidosa GY-D12 Mixotrophic Growth Model. GitHub, 2025.
+https://github.com/abida304523-afk/microalgae-blss-model
+```
